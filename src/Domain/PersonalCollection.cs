@@ -1,19 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Infrastructure.DomainBase;
 
 namespace Domain
 {
     public class PersonalCollection
     {
-        private IDictionary<int, int> _collection;
-        private IList<Deck> _decks; 
+        private IList<Card> _collection = new List<Card>();
+        private IList<Deck> _createdDecks = new List<Deck>(); 
 
         public PersonalCollection()
         {
             
+        }
+
+        public IList<Card> Collection
+        {
+            get { return _collection; }
+        }
+
+        public IList<Deck> Decks
+        {
+            get
+            {
+                return _createdDecks;
+            }
+        }
+
+        public IList<Card> GetUniqueList
+        {
+            get
+            {
+                return _collection.Distinct().ToList();
+            }
         }
     }
 }

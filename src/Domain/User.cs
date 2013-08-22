@@ -1,38 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain
 {
     public class User
     {
-        private int _id;
         private string _name;
         private string _loginName;
         private string _passWord;
 
-        public User(int id, string name, string login, string password)
+        public User(string name, string login, string password)
         {
-            Id = id;
             Name = name;
             LoginName = login;
             Password = password;
-        }
-
-        public int Id
-        {
-            get
-            {
-                return _id;
-            }
-            private set
-            {
-                if(value < 0)
-                    throw new Exception("Id must be greater then zero");
-                _id = value;
-            }
         }
 
         public string Name

@@ -44,7 +44,7 @@
   <ItemGroup>
     <Compile Include="Domain\CardTests.cs" />
     <Compile Include="Domain\DeckTests.cs" />
-    <Compile Include="Domain\InvoiceTests.cs" />
+    <Compile Include="Domain\PersonalCollectionTests.cs" />
     <Compile Include="Domain\UserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
