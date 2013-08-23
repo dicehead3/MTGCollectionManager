@@ -52,6 +52,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj">
+      <Project>{E3D406EC-A023-43D2-822E-904FC4DB0FFB}</Project>
+      <Name>Infrastructure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\src\Domain\Domain.csproj">
       <Project>{24D87D25-C50F-45F4-ADE9-BAD6F4BD2872}</Project>
       <Name>Domain</Name>

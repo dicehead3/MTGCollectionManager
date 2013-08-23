@@ -4,10 +4,10 @@ using Infrastructure.DomainBase;
 
 namespace Domain
 {
-    public class PersonalCollection
+    public class PersonalCollection : Entity
     {
-        private IList<Card> _collection = new List<Card>();
-        private IList<Deck> _createdDecks = new List<Deck>(); 
+        private readonly IList<Card> _collection = new List<Card>();
+        private readonly IList<Deck> _createdDecks = new List<Deck>(); 
 
         public PersonalCollection()
         {

@@ -18,25 +18,21 @@ namespace Tests.Domain
         public void CanAddCardsToCollection()
         {
             var col = new PersonalCollection();
-            var card = new Card("a", null, "Artifact", "Alara Reborn", Card.CardRarity.Uncommon, null, null, null, null, "John Doe", "C");
+            var card = new Card(15478, "Name", "Type", "Exp", CardRarity.Special, "Art", "Loc");
             col.Collection.Add(card);
             col.Collection.Add(card);
 
-            Assert.AreEqual(card.Description, col.Collection[0].Description);
-            Assert.AreEqual(card.FlavorText, col.Collection[0].FlavorText);
-            Assert.AreEqual(card.ImageLocation, col.Collection[0].ImageLocation);
-            Assert.AreEqual(card.Description, col.Collection[1].Description);
-            Assert.AreEqual(card.FlavorText, col.Collection[1].FlavorText);
-            Assert.AreEqual(card.ImageLocation, col.Collection[1].ImageLocation);
+            Assert.AreEqual(card.Id, col.Collection[0].Id);
+            Assert.AreEqual(card.Id, col.Collection[1].Id);
         }
 
         [Test]
         public void CanRemoveCardsFromCollection()
         {
             var col = new PersonalCollection();
-            var c1 = new Card("a", null, "Artifact", "Alara Reborn", Card.CardRarity.Uncommon, null, null, null, null, "John Doe", "C");
-            var c2 = new Card("b", null, "Artifact", "Alara Reborn", Card.CardRarity.Uncommon, null, null, null, null, "John Doe", "C");
-            var c3 = new Card("c", null, "Artifact", "Alara Reborn", Card.CardRarity.Uncommon, null, null, null, null, "John Doe", "C");
+            var c1 = new Card(15478, "A", "Type", "Exp", CardRarity.Special, "Art", "Loc");
+            var c2 = new Card(15479, "B", "Type", "Exp", CardRarity.Special, "Art", "Loc");
+            var c3 = new Card(15480, "C", "Type", "Exp", CardRarity.Special, "Art", "Loc");
 
             col.Collection.Add(c1);
             col.Collection.Add(c2);
@@ -44,15 +40,15 @@ namespace Tests.Domain
 
             col.Collection.Remove(c2);
             
-            Assert.AreNotEqual(c2.Name, col.Collection[1].Name);
-            Assert.AreEqual(c3.Name, col.Collection[1].Name);
+            Assert.AreNotEqual(c2.Id, col.Collection[1].Id);
+            Assert.AreEqual(c3.Id, col.Collection[1].Id);
         }
 
         [Test]
         public void CanAddDeckToCollection()
         {
             var col = new PersonalCollection();
-            var deck = new Deck("Blitz");
+            var deck = new Deck(01, "Blitz");
             col.Decks.Add(deck);
             
             Assert.AreEqual(deck.Name, col.Decks[0].Name);
@@ -62,9 +58,9 @@ namespace Tests.Domain
         public void CanRemoveDeckFromCollection()
         {
             var col = new PersonalCollection();
-            var d1 = new Deck("A");
-            var d2 = new Deck("B");
-            var d3 = new Deck("C");
+            var d1 = new Deck(01, "A");
+            var d2 = new Deck(02, "B");
+            var d3 = new Deck(03, "C");
 
             col.Decks.Add(d1);
             col.Decks.Add(d2);
@@ -72,9 +68,9 @@ namespace Tests.Domain
 
             col.Decks.Remove(d1);
 
-            Assert.AreNotEqual(d1.Name, col.Decks[0].Name);
-            Assert.AreEqual(d2.Name, col.Decks[0].Name);
-            Assert.AreEqual(d3.Name, col.Decks[1].Name);
+            Assert.AreNotEqual(d1.Id, col.Decks[0].Id);
+            Assert.AreEqual(d2.Id, col.Decks[0].Id);
+            Assert.AreEqual(d3.Id, col.Decks[1].Id);
         }
     }
 }

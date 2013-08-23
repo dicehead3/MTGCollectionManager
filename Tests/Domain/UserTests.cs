@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Domain;
+using Infrastructure.DomainBase;
 using NUnit.Framework;
 
 namespace Tests.Domain
@@ -11,53 +8,53 @@ namespace Tests.Domain
     [TestFixture]
     class UserTests
     {
-        private const string name = "Piet";
-        private const string loginName = "Gast";
-        private const string pw = "1234";
+        private const string Name = "Piet";
+        private const string LoginName = "Gast";
+        private const string Pw = "1234";
 
         [Test]
         public void CanCreateUser()
         {
-            var user = new User(name, loginName, pw);
-            Assert.AreEqual(name, user.Name);
-            Assert.AreEqual(loginName, user.LoginName);
-            Assert.AreEqual(pw, user.Password);
+            var user = new User(Name, LoginName, Pw);
+            Assert.AreEqual(Name, user.Name);
+            Assert.AreEqual(LoginName, user.LoginName);
+            Assert.AreEqual(Pw, user.Password);
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
         public void CannotCreateUserWithoutName()
         {
-            var user = new User(null, loginName, pw);
+            Assert.Throws<BusinessRuleViolationException>(() =>
+            {
+                new User(null, LoginName, Pw);
+            });
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
         public void CannotCreateUserWithoutLoginName()
         {
-            var user = new User(name, null, pw);
+            Assert.Throws<BusinessRuleViolationException>(() => { new User(Name, null, Pw); });
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
         public void CannotCreateUserWithoutPassword()
         {
-            var user = new User(name, loginName, "");
+            Assert.Throws<BusinessRuleViolationException>(() => { new User(Name, LoginName, ""); });
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
         public void CannotMakeNewPasswordEqualToOldPassword()
         {
-            var user = new User(name, loginName, pw);
-            user.Password = "1234";
+            Assert.Throws<Exception>(() =>
+            {
+                new User(Name, LoginName, Pw) {Password = "1234"};
+            });
         }
 
         [Test]
         public void CanSetNewPasswordNotEqualToOldPassword()
         {
-            var user = new User(name, loginName, pw);
-            user.Password = "2413";
+            new User(Name, LoginName, Pw) {Password = "2413"};
         }
     }
 }

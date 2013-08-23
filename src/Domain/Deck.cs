@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Infrastructure.DomainBase;
 
 namespace Domain
 {
-    public class Deck
+    public class Deck : Entity
     {
         private string _name;
         private readonly IDictionary<Card, int> _cardInDeck = new Dictionary<Card, int>();
 
-        public Deck(string name)
+        public Deck(int id, string name)
         {
+            Id = id;
             Name = name;
         }
 
@@ -23,9 +24,7 @@ namespace Domain
             get { return _name; }
             private set
             {
-                if(string.IsNullOrWhiteSpace(value))
-                    throw new Exception("Deckname can't be empty");
-                _name = value;
+                _name = value.Required("Deckname can't be empty");
             }
         }
     }

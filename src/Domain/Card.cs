@@ -1,5 +1,4 @@
-﻿using System;
-using Infrastructure.DomainBase;
+﻿using Infrastructure.DomainBase;
 
 namespace Domain
 {
@@ -13,30 +12,20 @@ namespace Domain
         private string _cardType;
         private string _artist;
         private string _expansion;
-        private int? _power;
-        private int? _toughness;
 
-        public Card(string name,
-            string manacost,
+        public Card(int id,
+            string name,
             string cardType,
             string expansion,
             CardRarity rarity,
-            string description,
-            string flavorText,
-            int? power,
-            int? toughness,
             string artist,
             string imageLocation)
         {
+            Id = id;
             Name = name;
-            ManaCost = manacost;
             CardType = cardType;
             Expansion = expansion;
             Rarity = rarity;
-            Description = description;
-            FlavorText = flavorText;
-            Power = power;
-            Toughness = toughness;
             Artist = artist;
             ImageLocation = imageLocation;
         }
@@ -52,21 +41,16 @@ namespace Domain
 
         public string ManaCost
         {
-            get { return _manaCost; }
-            private set
-            {
-                _manaCost = value ?? string.Empty;
-            }
+            get { return _manaCost ?? string.Empty; }
+            set { _manaCost = value ?? string.Empty; }
         }
-        [DomainSignature]
+
         public string CardType
         {
             get { return _cardType; }
             private set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new Exception("Card type is required");
-                _cardType = value;
+                _cardType = value.Required("Card type is required");
             }
         }
 
@@ -75,9 +59,7 @@ namespace Domain
             get { return _expansion; }
             private set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new Exception("Expansion is required");
-                _expansion = value;
+                _expansion = value.Required("Expansion is required");
             }
         }
 
@@ -85,38 +67,27 @@ namespace Domain
 
         public string Description
         {
-            get { return _description; }
-            private set
-            {
-                _description = value ?? string.Empty;
-            }
+            get { return _description ?? string.Empty; }
+            set { _description = value ?? string.Empty; }
         }
 
         public string FlavorText
         {
-            get { return _flavorText; }
-            private set
-            {
-                _flavorText = value ?? string.Empty;
-            }
+            get { return _flavorText ?? string.Empty; }
+            set { _flavorText = value ?? string.Empty; }
         }
 
-        public int? Power
-        {
-            get { return _power; }
-            private set { _power = value; }
-        }
+        public int? Power { get; set; }
 
-        public int? Toughness
-        {
-            get { return _toughness; }
-            private set { _toughness = value; }
-        }
+        public int? Toughness { get; set; }
 
         public string Artist
         {
             get { return _artist; }
-            set { _artist = value ?? string.Empty; }
+            private set
+            {
+                _artist = value.Required("Card must have an artist");
+            }
         }
 
         public string ImageLocation
@@ -124,9 +95,7 @@ namespace Domain
             get { return _imageLocation; }
             private set
             {
-                if(string.IsNullOrWhiteSpace(value))
-                    throw new Exception("Card Image Location is required");
-                _imageLocation = value;
+                _imageLocation = value.Required("Card Image Location is required");
             }
         }
     }

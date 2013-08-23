@@ -1,8 +1,9 @@
 ﻿using System;
+using Infrastructure.DomainBase;
 
 namespace Domain
 {
-    public class User
+    public class User : Entity
     {
         private string _name;
         private string _loginName;
@@ -23,9 +24,7 @@ namespace Domain
             }
             private set
             {
-                if(string.IsNullOrWhiteSpace(value))
-                    throw new Exception("User must have a name");
-                _name = value;
+                _name = value.Required("User must have a name");
             }
         }
 
@@ -37,9 +36,7 @@ namespace Domain
             }
             private set
             {
-                if(string.IsNullOrWhiteSpace(value))
-                    throw new Exception("User must have login name");
-                _loginName = value;
+                _loginName = value.Required("User must have login name");
             }
         }
 
@@ -51,11 +48,9 @@ namespace Domain
             }
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new Exception("User must have password");
                 if(_passWord != null && _passWord.Equals(value))
                     throw new Exception("New password can't be equal to old password");
-                _passWord = value;
+                _passWord = value.Required("User must have password");
             }
         }
     }
