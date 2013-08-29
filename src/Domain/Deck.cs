@@ -6,23 +6,26 @@ namespace Domain
     public class Deck : Entity
     {
         private string _name;
-        private readonly IDictionary<Card, int> _cardInDeck = new Dictionary<Card, int>();
+        private readonly IList<Card> _cardInDeck = new List<Card>();
 
-        public Deck(int id, string name)
+        public Deck(string name)
         {
-            Id = id;
             Name = name;
         }
 
-        public IDictionary<Card, int> CardInDeck
+        protected Deck()
+        {
+        }
+
+        public virtual IList<Card> CardInDeck
         {
             get { return _cardInDeck; }
         }
 
-        public string Name
+        public virtual string Name
         {
             get { return _name; }
-            private set
+            protected set
             {
                 _name = value.Required("Deckname can't be empty");
             }

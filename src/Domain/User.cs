@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Infrastructure.DomainBase;
 
 namespace Domain
@@ -7,7 +8,9 @@ namespace Domain
     {
         private string _name;
         private string _loginName;
-        private string _passWord;
+        private string _password;
+        private readonly IList<Card> _cards = new List<Card>();
+        private readonly IList<Deck> _decks = new List<Deck>();
 
         public User(string name, string login, string password)
         {
@@ -16,42 +19,56 @@ namespace Domain
             Password = password;
         }
 
-        public string Name
+        protected User()
+        {
+        }
+
+        public virtual string Name
         {
             get
             {
                 return _name;
             }
-            private set
+            protected set
             {
                 _name = value.Required("User must have a name");
             }
         }
 
-        public string LoginName
+        public virtual string LoginName
         {
             get
             {
                 return _loginName;
             }
-            private set
+            protected set
             {
                 _loginName = value.Required("User must have login name");
             }
         }
 
-        public string Password
+        public virtual string Password
         {
             get
             {
-                return _passWord;
+                return _password;
             }
             set
             {
-                if(_passWord != null && _passWord.Equals(value))
+                if(_password != null && _password.Equals(value))
                     throw new Exception("New password can't be equal to old password");
-                _passWord = value.Required("User must have password");
+                _password = value.Required("User must have password");
             }
         }
+
+        public virtual IList<Card> Cards
+        {
+            get { return _cards; }
+        }
+
+        public virtual IList<Deck> Decks
+        {
+            get { return _decks; }
+        } 
     }
 }

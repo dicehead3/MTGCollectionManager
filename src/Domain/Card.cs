@@ -13,7 +13,7 @@ namespace Domain
         private string _artist;
         private string _expansion;
 
-        public Card(int id,
+        public Card(
             string name,
             string cardType,
             string expansion,
@@ -21,7 +21,6 @@ namespace Domain
             string artist,
             string imageLocation)
         {
-            Id = id;
             Name = name;
             CardType = cardType;
             Expansion = expansion;
@@ -30,70 +29,74 @@ namespace Domain
             ImageLocation = imageLocation;
         }
 
-        public string Name
+        protected Card()
+        {
+        }
+
+        public virtual string Name
         {
             get { return _name; }
-            private set
+            protected set
             {
                 _name = value.Required("Card name is required");
             }
         }
 
-        public string ManaCost
+        public virtual string ManaCost
         {
             get { return _manaCost ?? string.Empty; }
             set { _manaCost = value ?? string.Empty; }
         }
 
-        public string CardType
+        public virtual string CardType
         {
             get { return _cardType; }
-            private set
+            protected set
             {
                 _cardType = value.Required("Card type is required");
             }
         }
 
-        public string Expansion
+        public virtual string Expansion
         {
             get { return _expansion; }
-            private set
+            protected set
             {
                 _expansion = value.Required("Expansion is required");
             }
         }
 
-        public CardRarity Rarity { get; private set; }
+        public virtual CardRarity Rarity { get; protected set; }
 
-        public string Description
+        public virtual string Description
         {
             get { return _description ?? string.Empty; }
             set { _description = value ?? string.Empty; }
         }
 
-        public string FlavorText
+        public virtual string FlavorText
         {
             get { return _flavorText ?? string.Empty; }
             set { _flavorText = value ?? string.Empty; }
         }
 
-        public int? Power { get; set; }
+        public virtual int? Power { get; set; }
 
-        public int? Toughness { get; set; }
+        public virtual int? Toughness { get; set; }
 
-        public string Artist
+        public virtual string Artist
         {
             get { return _artist; }
-            private set
+            protected set
             {
                 _artist = value.Required("Card must have an artist");
             }
         }
 
-        public string ImageLocation
+        public virtual string ImageLocation
         {
             get { return _imageLocation; }
-            private set
+            protected set
             {
                 _imageLocation = value.Required("Card Image Location is required");
             }

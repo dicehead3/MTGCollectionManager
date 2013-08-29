@@ -30,6 +30,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Iesi.Collections">
+      <HintPath>..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate">
+      <HintPath>..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -42,16 +48,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Domain\CardTests.cs" />
-    <Compile Include="Domain\DeckTests.cs" />
-    <Compile Include="Domain\PersonalCollectionTests.cs" />
-    <Compile Include="Domain\UserTests.cs" />
+    <Compile Include="Integration\Data\CardRepositoryTests.cs" />
+    <Compile Include="Integration\Data\DeckRepositoryTests.cs" />
+    <Compile Include="Integration\Data\UserRepositoryTests.cs" />
+    <Compile Include="Unit\Domain\CardTests.cs" />
+    <Compile Include="Unit\Domain\DeckTests.cs" />
+    <Compile Include="Unit\Domain\UserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\DataTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Data\Data.csproj">
+      <Project>{50020F5D-E4B3-4982-9222-6B4BBC1A88B9}</Project>
+      <Name>Data</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj">
       <Project>{E3D406EC-A023-43D2-822E-904FC4DB0FFB}</Project>
       <Name>Infrastructure</Name>
