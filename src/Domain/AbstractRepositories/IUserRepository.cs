@@ -12,5 +12,6 @@ namespace Domain.AbstractRepositories
         User Get(int id);
         IList<User> Get(Expression<Func<User, bool>> expression);
         void Save(User user);
+        bool EmailExists(string email);
     }
 }

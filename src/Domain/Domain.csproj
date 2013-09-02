@@ -46,6 +46,7 @@
     <Compile Include="CardRarity.cs" />
     <Compile Include="Deck.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Role.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>

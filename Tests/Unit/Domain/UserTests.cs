@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Domain;
+using Domain.AbstractRepositories;
 using Infrastructure.DomainBase;
+using Moq;
 using NUnit.Framework;
 
 namespace Tests.Unit.Domain
@@ -8,53 +11,29 @@ namespace Tests.Unit.Domain
     [TestFixture]
     class UserTests
     {
-        private const string Name = "Piet";
-        private const string LoginName = "Gast";
-        private const string Pw = "1234";
+        private static IUserRepository CreateTestUserRepository(bool emailUnique)
+        {
+            var mock = new Mock<IUserRepository>();
+            mock.Setup(x => x.EmailExists("aap@noot.mies"))
+                .Returns(emailUnique);
+
+            mock.Setup(x => x.EmailExists("noot@aap.mies"))
+                .Returns(emailUnique);
+
+            return mock.Object;
+        }
 
         [Test]
         public void CanCreateUser()
         {
-            var user = new User(Name, LoginName, Pw);
-            Assert.AreEqual(Name, user.Name);
-            Assert.AreEqual(LoginName, user.LoginName);
-            Assert.AreEqual(Pw, user.Password);
-        }
+            var userRepository = CreateTestUserRepository(true);
+            var user = new User("aap@noot.mies", "Jan", userRepository);
 
-        [Test]
-        public void CannotCreateUserWithoutName()
-        {
-            Assert.Throws<BusinessRuleViolationException>(() =>
-            {
-                new User(null, LoginName, Pw);
-            });
-        }
-
-        [Test]
-        public void CannotCreateUserWithoutLoginName()
-        {
-            Assert.Throws<BusinessRuleViolationException>(() => { new User(Name, null, Pw); });
-        }
-
-        [Test]
-        public void CannotCreateUserWithoutPassword()
-        {
-            Assert.Throws<BusinessRuleViolationException>(() => { new User(Name, LoginName, ""); });
-        }
-
-        [Test]
-        public void CannotMakeNewPasswordEqualToOldPassword()
-        {
-            Assert.Throws<Exception>(() =>
-            {
-                new User(Name, LoginName, Pw) {Password = "1234"};
-            });
-        }
-
-        [Test]
-        public void CanSetNewPasswordNotEqualToOldPassword()
-        {
-            new User(Name, LoginName, Pw) {Password = "2413"};
+            Assert.AreEqual("aap@noot.mies", user.Email);
+            Assert.AreEqual("Jan", user.DisplayName);
+            Assert.AreEqual(0, user.Roles.Count);
+            Assert.AreEqual(0, user.Decks.Count);
+            Assert.AreEqual(0, user.Cards.Count);
         }
     }
 }

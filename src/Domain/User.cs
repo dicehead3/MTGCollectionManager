@@ -1,64 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Principal;
+using Domain.AbstractRepositories;
 using Infrastructure.DomainBase;
 
 namespace Domain
 {
-    public class User : Entity
+    public class User : Entity, IPrincipal
     {
-        private string _name;
-        private string _loginName;
-        private string _password;
         private readonly IList<Card> _cards = new List<Card>();
         private readonly IList<Deck> _decks = new List<Deck>();
+        private string _displayName;
+        private string _email;
+        private IIdentity _identity;
+        private ISet<Role> _roles = new HashSet<Role>();
 
-        public User(string name, string login, string password)
+        public User(string email, string name, IUserRepository repository)
         {
-            Name = name;
-            LoginName = login;
-            Password = password;
+            DisplayName = name;
+            CheckEmail(email, repository);
         }
 
         protected User()
         {
         }
 
-        public virtual string Name
+        private void CheckEmail(string email, IUserRepository repository)
         {
-            get
+            var v = repository.EmailExists(email);
+            if (!repository.EmailExists(email))
             {
-                return _name;
-            }
-            protected set
-            {
-                _name = value.Required("User must have a name");
+                _email = email.Required("Please enter your email address").ValidEmailAddress();
             }
         }
 
-        public virtual string LoginName
+        public virtual ISet<Role> Roles
         {
-            get
-            {
-                return _loginName;
-            }
-            protected set
-            {
-                _loginName = value.Required("User must have login name");
-            }
+            get { return _roles; }
+        } 
+
+        public virtual string Email
+        {
+            get { return _email; }
         }
 
-        public virtual string Password
+        public virtual string DisplayName
         {
-            get
-            {
-                return _password;
-            }
-            set
-            {
-                if(_password != null && _password.Equals(value))
-                    throw new Exception("New password can't be equal to old password");
-                _password = value.Required("User must have password");
-            }
+            get { return _displayName; }
+            set { _displayName = value.Required("Please set a name to display."); }
         }
 
         public virtual IList<Card> Cards
@@ -69,6 +58,21 @@ namespace Domain
         public virtual IList<Deck> Decks
         {
             get { return _decks; }
-        } 
+        }
+
+        public IIdentity Identity
+        {
+            get { return _identity ?? (_identity = new GenericIdentity(Email)); }
+        }
+
+        public bool IsInRole(string role)
+        {
+            return IsInRole((Role) Enum.Parse(typeof (Role), role, true));
+        }
+
+        public bool IsInRole(Role role)
+        {
+            return _roles.Contains(role);
+        }
     }
 }

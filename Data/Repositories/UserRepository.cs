@@ -32,5 +32,10 @@ namespace Data.Repositories
         {
             _session.Save(user);
         }
+
+        public bool EmailExists(string email)
+        {
+            return _session.Query<User>().First(u => u.Email.Equals(email)) == null;
+        }
     }
 }
