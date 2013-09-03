@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Http;
+﻿using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using Data.Utils;
+using NHibernate;
+using WebPortal.App_Start;
 
 namespace WebPortal
 {
@@ -14,8 +13,12 @@ namespace WebPortal
 
     public class MvcApplication : System.Web.HttpApplication
     {
+        public ISessionFactory SessionFactory { get; set; }
+
         protected void Application_Start()
         {
+            SessionFactory = NHibernateHelper.SessionFactory;
+
             AreaRegistration.RegisterAllAreas();
 
             WebApiConfig.Register(GlobalConfiguration.Configuration);
@@ -23,6 +26,8 @@ namespace WebPortal
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             AuthConfig.RegisterAuth();
+
+            ControllerBuilder.Current.SetControllerFactory(new NinjectController());
         }
     }
 }

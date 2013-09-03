@@ -51,7 +51,7 @@ namespace WebPortal.Models
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm new password")]
-        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        [Compare("NewPassword", ErrorMessage = "The new password and the confirm password didn't match")]
         public string ConfirmPassword { get; set; }
     }
 
@@ -73,8 +73,12 @@ namespace WebPortal.Models
     public class RegisterModel
     {
         [Required]
-        [Display(Name = "User name")]
-        public string UserName { get; set; }
+        [Display(Name = "Email address")]
+        public string Email { get; set; }
+
+        [Required]
+        [Display(Name="Display name")]
+        public string DisplayName { get; set; }
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]

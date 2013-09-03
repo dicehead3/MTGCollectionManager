@@ -12,7 +12,11 @@
         <header>
             <div class="content-wrapper">
                 <div class="float-left">
-                    <p class="site-title">@Html.ActionLink("your logo here", "Index", "Home")</p>
+                    <p class="site-title">@Html.ActionLink(" ", "Index", "Home",
+                        new
+                        {
+                            style = "background: url('" + Url.Content("~/images/magic_logo.png") + "') no-repeat center left; display: block; height: 50px; width: 178px;"
+                        })</p>
                 </div>
                 <div class="float-right">
                     <section id="login">

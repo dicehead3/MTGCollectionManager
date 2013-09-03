@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Transactions;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
+using Domain;
 using Domain.AbstractRepositories;
 using DotNetOpenAuth.AspNet;
 using Microsoft.Web.WebPages.OAuth;
@@ -53,24 +53,6 @@ namespace WebPortal.Controllers
             return View(model);
         }
 
-        ////
-        //// POST: /Account/Login
-
-        //[HttpPost]
-        //[AllowAnonymous]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Login(LoginModel model, string returnUrl)
-        //{
-        //    if (ModelState.IsValid && WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe))
-        //    {
-        //        return RedirectToLocal(returnUrl);
-        //    }
-
-        //    // If we got this far, something failed, redisplay form
-        //    ModelState.AddModelError("", "The user name or password provided is incorrect.");
-        //    return View(model);
-        //}
-
         //
         // POST: /Account/LogOff
 
@@ -91,10 +73,7 @@ namespace WebPortal.Controllers
         {
             return View();
         }
-
-        //
-        // POST: /Account/Register
-
+        
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -105,8 +84,9 @@ namespace WebPortal.Controllers
                 // Attempt to register the user
                 try
                 {
-                    WebSecurity.CreateUserAndAccount(model.UserName, model.Password);
-                    WebSecurity.Login(model.UserName, model.Password);
+                    var user = new User(model.Email, model.DisplayName, _userRepository);
+                    _userRepository.CreateNewUser(user, model.Password);
+                    _userRepository.AuthenticateUser(model.Email, model.ConfirmPassword);
                     return RedirectToAction("Index", "Home");
                 }
                 catch (MembershipCreateUserException e)
@@ -170,57 +150,64 @@ namespace WebPortal.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Manage(LocalPasswordModel model)
         {
-            bool hasLocalAccount = OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
-            ViewBag.HasLocalPassword = hasLocalAccount;
+            //bool hasLocalAccount = OAuthWebSecurity.HasLocalAccount(WebSecurity.GetUserId(User.Identity.Name));
+            //ViewBag.HasLocalPassword = hasLocalAccount;
             ViewBag.ReturnUrl = Url.Action("Manage");
-            if (hasLocalAccount)
-            {
+            //if (hasLocalAccount)
+            //{
                 if (ModelState.IsValid)
                 {
                     // ChangePassword will throw an exception rather than return false in certain failure scenarios.
-                    bool changePasswordSucceeded;
+                    ChangePassswordMessage changePasswordMessage;
                     try
                     {
-                        changePasswordSucceeded = WebSecurity.ChangePassword(User.Identity.Name, model.OldPassword, model.NewPassword);
+                        changePasswordMessage =
+                            //WebSecurity.ChangePassword(User.Identity.Name, model.OldPassword, model.NewPassword);
+                            _userRepository.ChangePassword(User.Identity.Name, model.OldPassword, model.NewPassword,
+                                model.ConfirmPassword);
                     }
                     catch (Exception)
                     {
-                        changePasswordSucceeded = false;
+                        changePasswordMessage = ChangePassswordMessage.Error;
                     }
 
-                    if (changePasswordSucceeded)
+                    if (changePasswordMessage == ChangePassswordMessage.PasswordChanged)
                     {
                         return RedirectToAction("Manage", new { Message = ManageMessageId.ChangePasswordSuccess });
                     }
-                    else
-                    {
-                        ModelState.AddModelError("", "The current password is incorrect or the new password is invalid.");
-                    }
+                    ModelState.AddModelError("",
+                        changePasswordMessage == ChangePassswordMessage.Error
+                            ? "An error occured, please reload the page and try again"
+                            : changePasswordMessage == ChangePassswordMessage.NewPasswordsDontMatch
+                                ? "The new password and the confirm password didn't match"
+                                : changePasswordMessage == ChangePassswordMessage.OldAndNewIdentical
+                                    ? "The old and new password can't be identical"
+                                    : "Your old password was incorrect");
                 }
-            }
-            else
-            {
-                // User does not have a local password so remove any validation errors caused by a missing
-                // OldPassword field
-                ModelState state = ModelState["OldPassword"];
-                if (state != null)
-                {
-                    state.Errors.Clear();
-                }
+            //}
+            //else
+            //{
+            //    // User does not have a local password so remove any validation errors caused by a missing
+            //    // OldPassword field
+            //    ModelState state = ModelState["OldPassword"];
+            //    if (state != null)
+            //    {
+            //        state.Errors.Clear();
+            //    }
 
-                if (ModelState.IsValid)
-                {
-                    try
-                    {
-                        WebSecurity.CreateAccount(User.Identity.Name, model.NewPassword);
-                        return RedirectToAction("Manage", new { Message = ManageMessageId.SetPasswordSuccess });
-                    }
-                    catch (Exception)
-                    {
-                        ModelState.AddModelError("", String.Format("Unable to create local account. An account with the name \"{0}\" may already exist.", User.Identity.Name));
-                    }
-                }
-            }
+            //    if (ModelState.IsValid)
+            //    {
+            //        try
+            //        {
+            //            WebSecurity.CreateAccount(User.Identity.Name, model.NewPassword);
+            //            return RedirectToAction("Manage", new { Message = ManageMessageId.SetPasswordSuccess });
+            //        }
+            //        catch (Exception)
+            //        {
+            //            ModelState.AddModelError("", String.Format("Unable to create local account. An account with the name \"{0}\" may already exist.", User.Identity.Name));
+            //        }
+            //    }
+            //}
 
             // If we got this far, something failed, redisplay form
             return View(model);
@@ -260,14 +247,11 @@ namespace WebPortal.Controllers
                 OAuthWebSecurity.CreateOrUpdateAccount(result.Provider, result.ProviderUserId, User.Identity.Name);
                 return RedirectToLocal(returnUrl);
             }
-            else
-            {
-                // User is new, ask for their desired membership name
-                string loginData = OAuthWebSecurity.SerializeProviderUserId(result.Provider, result.ProviderUserId);
-                ViewBag.ProviderDisplayName = OAuthWebSecurity.GetOAuthClientData(result.Provider).DisplayName;
-                ViewBag.ReturnUrl = returnUrl;
-                return View("ExternalLoginConfirmation", new RegisterExternalLoginModel { UserName = result.UserName, ExternalLoginData = loginData });
-            }
+            // User is new, ask for their desired membership name
+            string loginData = OAuthWebSecurity.SerializeProviderUserId(result.Provider, result.ProviderUserId);
+            ViewBag.ProviderDisplayName = OAuthWebSecurity.GetOAuthClientData(result.Provider).DisplayName;
+            ViewBag.ReturnUrl = returnUrl;
+            return View("ExternalLoginConfirmation", new RegisterExternalLoginModel { UserName = result.UserName, ExternalLoginData = loginData });
         }
 
         //
@@ -278,8 +262,8 @@ namespace WebPortal.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ExternalLoginConfirmation(RegisterExternalLoginModel model, string returnUrl)
         {
-            string provider = null;
-            string providerUserId = null;
+            string provider;
+            string providerUserId;
 
             if (User.Identity.IsAuthenticated || !OAuthWebSecurity.TryDeserializeProviderUserId(model.ExternalLoginData, out provider, out providerUserId))
             {
@@ -304,10 +288,7 @@ namespace WebPortal.Controllers
 
                         return RedirectToLocal(returnUrl);
                     }
-                    else
-                    {
-                        ModelState.AddModelError("UserName", "User name already exists. Please enter a different user name.");
-                    }
+                    ModelState.AddModelError("UserName", "User name already exists. Please enter a different user name.");
                 }
             }
 
@@ -361,10 +342,7 @@ namespace WebPortal.Controllers
             {
                 return Redirect(returnUrl);
             }
-            else
-            {
-                return RedirectToAction("Index", "Home");
-            }
+            return RedirectToAction("Index", "Home");
         }
 
         public enum ManageMessageId

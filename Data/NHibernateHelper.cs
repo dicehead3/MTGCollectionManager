@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -30,7 +31,7 @@ namespace Data.Utils
             // Build NHibernate session factory, expensive proces, should only fire when application first starts
 			// Configuration is set in .config file
 			Configuration = new Configuration();
-			//Configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionString, applicationSettings.ConnectionString);
+			Configuration.SetProperty(NHibernate.Cfg.Environment.ConnectionString, ConfigurationManager.AppSettings["ConnectionString"]);
 			Configuration.Configure();
 			
 			SessionFactory = Fluently.Configure(Configuration)

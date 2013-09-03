@@ -73,6 +73,35 @@ namespace Data.Repositories
             return DoesPasswordMatch(password, hashedPassword);
         }
 
+        public ChangePassswordMessage ChangePassword(string userEmail, string oldPassword, string newPassword, string confirmNewPassword)
+        {
+            if(!newPassword.Equals(confirmNewPassword))
+                return ChangePassswordMessage.NewPasswordsDontMatch;
+            if(newPassword.Equals(oldPassword))
+                return ChangePassswordMessage.OldAndNewIdentical;
+
+            const string query = "SELECT password, id FROM Users WHERE Email = :Email";
+            var result = _session.CreateSQLQuery(query)
+                .SetString("Email", userEmail)
+                .UniqueResult<dynamic>();
+
+            if (result == null)
+                return ChangePassswordMessage.Error;
+
+            var hashedPassword = result[0].ToString();
+            var id = Int32.Parse(result[1].ToString());
+            if(!DoesPasswordMatch(oldPassword, hashedPassword))
+                return ChangePassswordMessage.OldPasswordIncorrect;
+
+            const string updateQuery = "UPDATE Users SET Password = :Password WHERE Id = :UserId";
+
+            _session.CreateSQLQuery(updateQuery)
+                .SetInt32("UserId", (int)id)
+                .SetString("Password", HashPassword(newPassword))
+                .UniqueResult();
+            return ChangePassswordMessage.PasswordChanged;
+        }
+
         private bool DoesPasswordMatch(string password, string passwordFromDatabase)
         {
             var pepper = passwordFromDatabase.Substring(0, 8);
