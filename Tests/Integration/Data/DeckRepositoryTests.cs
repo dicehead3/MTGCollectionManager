@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Data.Repositories;
+﻿using Data.Repositories;
 using Domain;
 using NUnit.Framework;
 using Tests.Utils;
@@ -15,7 +14,7 @@ namespace Tests.Integration.Data
             var cardRepository = new CardRepository(Session);
             var card = new Card("A", "type", "m14", CardRarity.Special, "Barry", "nowhere");
             var deck = new Deck("DeckName");
-            deck.CardInDeck.Add(card);
+            deck.Cards.Add(card);
 
             Session.BeginTransaction();
             cardRepository.Save(card);
@@ -29,7 +28,7 @@ namespace Tests.Integration.Data
             var deckFromRepository = deckRepository.Get(deck.Id);
 
             Assert.AreEqual("DeckName", deckFromRepository.Name);
-            Assert.AreEqual(1, deckFromRepository.CardInDeck.Count);
+            Assert.AreEqual(1, deckFromRepository.Cards.Count);
         }
     }
 }

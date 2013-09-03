@@ -6,7 +6,7 @@ namespace Domain
     public class Deck : Entity
     {
         private string _name;
-        private readonly IList<Card> _cardInDeck = new List<Card>();
+        private readonly IList<Card> _cards = new List<Card>();
 
         public Deck(string name)
         {
@@ -17,9 +17,9 @@ namespace Domain
         {
         }
 
-        public virtual IList<Card> CardInDeck
+        public virtual IList<Card> Cards
         {
-            get { return _cardInDeck; }
+            get { return _cards; }
         }
 
         public virtual string Name

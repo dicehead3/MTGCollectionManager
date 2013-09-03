@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.AbstractRepositories
 {
@@ -11,7 +8,9 @@ namespace Domain.AbstractRepositories
     {
         User Get(int id);
         IList<User> Get(Expression<Func<User, bool>> expression);
+        void CreateNewUser(User user, string password);
         void Save(User user);
         bool EmailExists(string email);
+        bool AuthenticateUser(string userEmail, string password);
     }
 }

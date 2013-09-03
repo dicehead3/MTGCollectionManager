@@ -13,7 +13,7 @@ namespace Data.Mappings
                 .Not.Nullable()
                 .Length(9999)
                 .Access.CamelCaseField(Prefix.Underscore);
-            HasMany(x => x.CardInDeck)
+            HasManyToMany(x => x.Cards)
                 .AsBag()
                 .Cascade.None()
                 .Access.CamelCaseField(Prefix.Underscore);

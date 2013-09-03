@@ -17,7 +17,6 @@ namespace Tests.Unit.Domain
         private const string Artist = "John Doe";
         private const string FlavorText = "Comming at you.";
         private const string Desc = "Cycling {R/G}";
-        private const int Id = 30954;
 
         [Test]
         public void CanCreateCard()

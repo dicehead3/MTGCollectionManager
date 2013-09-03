@@ -23,11 +23,11 @@ namespace Data.Mappings
                 .Access.CamelCaseField(Prefix.Underscore)
                 .Not.Nullable()
                 .Length(200);
-            Map(x => x.Identity)
-                .Access.CamelCaseField(Prefix.Underscore);
             HasMany(x => x.Roles)
                 .Access.CamelCaseField(Prefix.Underscore)
-                .AsSet().Cascade.AllDeleteOrphan();
+                .AsSet()
+                .Element("Role")
+                .Cascade.AllDeleteOrphan();
         }
     }
 }

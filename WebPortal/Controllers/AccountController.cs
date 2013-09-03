@@ -5,6 +5,7 @@ using System.Transactions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
+using Domain.AbstractRepositories;
 using DotNetOpenAuth.AspNet;
 using Microsoft.Web.WebPages.OAuth;
 using WebMatrix.WebData;
@@ -17,6 +18,13 @@ namespace WebPortal.Controllers
     [InitializeSimpleMembership]
     public class AccountController : Controller
     {
+        private readonly IUserRepository _userRepository;
+
+        public AccountController(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
+
         //
         // GET: /Account/Login
 
@@ -27,23 +35,41 @@ namespace WebPortal.Controllers
             return View();
         }
 
-        //
-        // POST: /Account/Login
-
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult Login(LoginModel model, string returnUrl)
         {
-            if (ModelState.IsValid && WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe))
+            if (_userRepository.AuthenticateUser(model.UserName, model.Password))
             {
-                return RedirectToLocal(returnUrl);
+                FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+                if (Url.IsLocalUrl(returnUrl) && returnUrl != "/")
+                {
+                    Redirect(returnUrl);
+                }
+                return RedirectToAction("Index", "Home");
             }
-
-            // If we got this far, something failed, redisplay form
-            ModelState.AddModelError("", "The user name or password provided is incorrect.");
+            ModelState.AddModelError("", "Email or password is incorrect");
             return View(model);
         }
+
+        ////
+        //// POST: /Account/Login
+
+        //[HttpPost]
+        //[AllowAnonymous]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult Login(LoginModel model, string returnUrl)
+        //{
+        //    if (ModelState.IsValid && WebSecurity.Login(model.UserName, model.Password, persistCookie: model.RememberMe))
+        //    {
+        //        return RedirectToLocal(returnUrl);
+        //    }
+
+        //    // If we got this far, something failed, redisplay form
+        //    ModelState.AddModelError("", "The user name or password provided is incorrect.");
+        //    return View(model);
+        //}
 
         //
         // POST: /Account/LogOff

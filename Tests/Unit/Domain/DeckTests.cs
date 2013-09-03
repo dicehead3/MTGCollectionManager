@@ -18,10 +18,10 @@ namespace Tests.Unit.Domain
         {
             var deck = new Deck("BattleBlitz");
             var card = new Card("Name", "Type", "Exp", CardRarity.Special, "Art", "Loc");
-            deck.CardInDeck.Add(card);
+            deck.Cards.Add(card);
 
-            Assert.AreEqual(1, deck.CardInDeck.Count);
-            Assert.AreEqual(card.Name, deck.CardInDeck[0].Name);
+            Assert.AreEqual(1, deck.Cards.Count);
+            Assert.AreEqual(card.Name, deck.Cards[0].Name);
         }
 
         [Test]
@@ -31,13 +31,13 @@ namespace Tests.Unit.Domain
             var card = new Card("A", "Type", "Exp", CardRarity.Special, "Art", "Loc");
             var card2 = new Card("B", "Type", "Exp", CardRarity.Special, "Art", "Loc");
 
-            deck.CardInDeck.Add(card);
-            deck.CardInDeck.Add(card2);
-            deck.CardInDeck.RemoveAt(1);
+            deck.Cards.Add(card);
+            deck.Cards.Add(card2);
+            deck.Cards.RemoveAt(1);
 
-            Assert.AreNotEqual(2, deck.CardInDeck.Count);
-            Assert.AreEqual(1, deck.CardInDeck.Count);
-            Assert.AreEqual("A", deck.CardInDeck[0].Name);
+            Assert.AreNotEqual(2, deck.Cards.Count);
+            Assert.AreEqual(1, deck.Cards.Count);
+            Assert.AreEqual("A", deck.Cards[0].Name);
         }
     }
 }

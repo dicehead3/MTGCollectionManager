@@ -1,4 +1,5 @@
 ﻿using Data.Utils;
+using Infrastructure.Encryption;
 using NHibernate;
 using NHibernate.Context;
 using NUnit.Framework;
@@ -10,6 +11,11 @@ namespace Tests.Utils
     {
         protected ISession Session;
         protected ISessionFactory SessionFactory;
+
+        protected IEncryptor Encryptor
+        {
+            get { return new DefaultEncryptor(); }
+        }
         
         [SetUp]
         public void Setup()

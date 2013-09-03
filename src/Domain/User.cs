@@ -13,7 +13,7 @@ namespace Domain
         private string _displayName;
         private string _email;
         private IIdentity _identity;
-        private ISet<Role> _roles = new HashSet<Role>();
+        private readonly ICollection<Role> _roles = new HashSet<Role>();
 
         public User(string email, string name, IUserRepository repository)
         {
@@ -27,14 +27,18 @@ namespace Domain
 
         private void CheckEmail(string email, IUserRepository repository)
         {
-            var v = repository.EmailExists(email);
-            if (!repository.EmailExists(email))
+            var mail = email.Required("Please enter your email address").ValidEmailAddress();
+            if (!repository.EmailExists(mail))
             {
-                _email = email.Required("Please enter your email address").ValidEmailAddress();
+                _email = mail;
+            }
+            else
+            {
+                throw new BusinessRuleViolationException("Email already registered.");
             }
         }
 
-        public virtual ISet<Role> Roles
+        public virtual ICollection<Role> Roles
         {
             get { return _roles; }
         } 
@@ -60,17 +64,17 @@ namespace Domain
             get { return _decks; }
         }
 
-        public IIdentity Identity
+        public virtual IIdentity Identity
         {
             get { return _identity ?? (_identity = new GenericIdentity(Email)); }
         }
 
-        public bool IsInRole(string role)
+        public virtual bool IsInRole(string role)
         {
             return IsInRole((Role) Enum.Parse(typeof (Role), role, true));
         }
 
-        public bool IsInRole(Role role)
+        public virtual bool IsInRole(Role role)
         {
             return _roles.Contains(role);
         }

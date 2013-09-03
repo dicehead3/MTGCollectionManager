@@ -45,6 +45,8 @@
     <Compile Include="DomainBase\Entity.cs" />
     <Compile Include="DomainBase\ValidationExtenders.cs" />
     <Compile Include="DomainBase\ValueObject.cs" />
+    <Compile Include="Encryption\DefaultEncryptor.cs" />
+    <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
