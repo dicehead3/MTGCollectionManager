@@ -102,6 +102,11 @@ namespace Data.Repositories
             return ChangePassswordMessage.PasswordChanged;
         }
 
+        public void ResetPassword(string userEmail)
+        {
+            
+        }
+
         private bool DoesPasswordMatch(string password, string passwordFromDatabase)
         {
             var pepper = passwordFromDatabase.Substring(0, 8);

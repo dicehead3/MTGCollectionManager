@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Data.Repositories;
+﻿using Data.Repositories;
 using Domain;
 using NUnit.Framework;
 using Tests.Utils;
