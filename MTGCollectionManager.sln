@@ -9,7 +9,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{50020F5D-E4B3-4982-9222-6B4BBC1A88B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebPortal", "WebPortal\WebPortal.csproj", "{A49E7C78-55F0-4B49-B158-627D81412EE3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Temorary Code Save", "Temorary Code Save", "{3C2409CD-214F-4133-9709-22254A8DB866}"
+	ProjectSection(SolutionItems) = preProject
+		NHibernate Connection String.txt = NHibernate Connection String.txt
+		WebPortal\App_Start\NinjectController.cs = WebPortal\App_Start\NinjectController.cs
+		UserLogin.txt = UserLogin.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.UI", "Web.UI\Web.UI.csproj", "{579160F0-1F0C-4391-B5A7-34D596C1D14A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +40,10 @@ Global
 		{50020F5D-E4B3-4982-9222-6B4BBC1A88B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50020F5D-E4B3-4982-9222-6B4BBC1A88B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50020F5D-E4B3-4982-9222-6B4BBC1A88B9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A49E7C78-55F0-4B49-B158-627D81412EE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A49E7C78-55F0-4B49-B158-627D81412EE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A49E7C78-55F0-4B49-B158-627D81412EE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A49E7C78-55F0-4B49-B158-627D81412EE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{579160F0-1F0C-4391-B5A7-34D596C1D14A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{579160F0-1F0C-4391-B5A7-34D596C1D14A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{579160F0-1F0C-4391-B5A7-34D596C1D14A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{579160F0-1F0C-4391-B5A7-34D596C1D14A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
