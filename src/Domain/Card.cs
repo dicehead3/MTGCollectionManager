@@ -1,5 +1,6 @@
 ﻿using Infrastructure.DomainBase;
 
+
 namespace Domain
 {
     public class Card : Entity
