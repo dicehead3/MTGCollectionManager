@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using System.Activities.Statements
+@using Infrastructure.HtmlHelpers
+@using Web.UI.Controllers
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -25,6 +28,13 @@
         <script src="../../assets/js/html5shiv.js"></script>
         <script src="../../assets/js/respond.min.js"></script>
         <![endif]-->
+        
+        <script type="text/javascript">
+            function select(id) {
+                document.getElementsByClassName("active").className = "";
+                document.getElementById(id).className = "active";
+            }
+        </script>
     </head>
 
     <body>
@@ -36,10 +46,10 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Project name</a>
+                    <a class="navbar-brand" href="#">MTG Collection Manager</a>
                 </div>
                 <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
+                    @*<ul class="nav navbar-nav">
                         <li class="active"><a href="#">Home</a></li>
                         <li><a href="#about">About</a></li>
                         <li><a href="#contact">Contact</a></li>
@@ -55,11 +65,25 @@
                                 <li><a href="#">One more separated link</a></li>
                             </ul>
                         </li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li><a href="@Url.Action("Index", "Login")">Log in</a></li>
-                        <li><a href="./">Register</a></li>
-                    </ul>
+                    </ul>*@
+                    @(Html.MainMenu()
+                        .Add(new MainMenuItem()
+                        .Action<HomeController>("Index")
+                        .Text("Home"))
+                        .Add(new MainMenuItem()
+                        .Action<HomeController>("About")
+                        .Text("About"))
+                        .Add(new MainMenuItem()
+                        .Action<HomeController>("Contact")
+                        .Text("Contact"))
+                          );
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="@Url.Action("Index", "Login")" onclick=" select('login') ">Log in</a></li>
+                            <li><a href="@Url.Action("Register", "Login")">Register</a></li>
+                        </ul>
+                    }
                 </div>
             </div>
         </div>
