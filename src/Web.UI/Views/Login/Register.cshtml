@@ -1,0 +1,23 @@
+﻿@model Web.UI.ViewModels.RegisterViewModel
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form id="login-form" action="@Url.Action("Register")" method="POST" class="form-signin">
+    <h2 class="form-signin-heading">Please sign in</h2>
+    <input type="text" class="form-control" placeholder="Email address" autofocus id="Email" 
+           name="Email" data-val="true" data-val-required="Email address is required"/>
+    <input type ="text" class="form-control" placeholder="Display name" id="DisplayName"
+        name="DisplayName" data-val ="true" data-val-required="Display name is required"/>
+    <input type="password" class="form-control" placeholder="Password" id="Password" name="Password" 
+           data-val="true" data-val-length="Minimum password length is 6 characters" 
+           data-val-length-min="6" data-val-required="Password is required" />
+    <input type="password" class="form-control" placeholder="Confirm password" id="ConfirmPassword" name="ConfirmPassword" 
+            data-val="true" data-val-length="Minimum password length is 6 characters" 
+            data-val-length-min="6" data-val-required="Password is required" />
+    <span class="field-validation-valid" data-valmsg-for="Email" data-valmsg-replace="true"></span>
+    <span class="field-validation-valid" data-valmsg-for="Password" data-valmsg-replace="true"></span>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+</form>
+
