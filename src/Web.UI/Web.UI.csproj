@@ -172,10 +172,10 @@
     <Content Include="Views\Login\Register.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
+    <Content Include="Views\CollectionManager\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Views\CollectionManager\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

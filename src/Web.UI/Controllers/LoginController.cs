@@ -1,5 +1,7 @@
-﻿using System.Web.Mvc;
+﻿using System;
+using System.Web.Mvc;
 using System.Web.Security;
+using Domain;
 using Domain.AbstractRepositories;
 using Web.UI.Models;
 using Web.UI.ViewModels;
@@ -28,6 +30,7 @@ namespace Web.UI.Controllers
             if (_userRepository.AuthenticateUser(model.Email, model.Password))
             {
                 FormsAuthentication.SetAuthCookie(model.Email, model.RememberMe);
+                var v = User.Identity.IsAuthenticated;
                 if (Url.IsLocalUrl(returnUrl) && returnUrl != "/")
                 {
                     Redirect(returnUrl);
@@ -48,6 +51,16 @@ namespace Web.UI.Controllers
         [HttpPost]
         public ActionResult Register(RegisterViewModel model, string returnUrl)
         {
+            if (ModelState.IsValid)
+            {
+                var user = new User(model.Email, model.DisplayName, _userRepository);
+                _userRepository.CreateNewUser(user, model.Password);
+                if (_userRepository.AuthenticateUser(model.Email, model.Password))
+                {
+                    var v = User.Identity.IsAuthenticated;
+                }
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
     }

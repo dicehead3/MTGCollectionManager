@@ -11,7 +11,7 @@
         <link rel="shortcut icon" 
             href="http://gatherer.wizards.com/handlers/image.ashx?size=medium&name=G&type=symbol">
 
-        <title>Log in</title>
+        <title>@ViewBag.Title</title>
 
         <!-- Bootstrap core CSS -->
         <link href="~/Content/bootstrap.css" rel="stylesheet">
@@ -28,13 +28,6 @@
         <script src="../../assets/js/html5shiv.js"></script>
         <script src="../../assets/js/respond.min.js"></script>
         <![endif]-->
-        
-        <script type="text/javascript">
-            function select(id) {
-                document.getElementsByClassName("active").className = "";
-                document.getElementById(id).className = "active";
-            }
-        </script>
     </head>
 
     <body>
@@ -75,13 +68,12 @@
                         .Text("About"))
                         .Add(new MainMenuItem()
                         .Action<HomeController>("Contact")
-                        .Text("Contact"))
-                          );
+                            .Text("Contact")))
                     @if (!User.Identity.IsAuthenticated)
                     {
                         <ul class="nav navbar-nav navbar-right">
-                            <li><a href="@Url.Action("Index", "Login")" onclick=" select('login') ">Log in</a></li>
-                            <li><a href="@Url.Action("Register", "Login")">Register</a></li>
+                            <li><a href="@Url.Action("Index", "Login")" >Log in</a></li>
+                            @*<li><a href="@Url.Action("Register", "Login")">Register</a></li>*@
                         </ul>
                     }
                 </div>

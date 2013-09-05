@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Web.Security;
 using Domain;
 using Domain.AbstractRepositories;
 using Infrastructure.Encryption;
@@ -70,7 +71,11 @@ namespace Data.Repositories
 
             var hashedPassword = result.ToString();
 
-            return DoesPasswordMatch(password, hashedPassword);
+            var  passwordsMatch = DoesPasswordMatch(password, hashedPassword);
+            if (passwordsMatch)
+                FormsAuthentication.Authenticate(userEmail, password);
+                FormsAuthentication.SetAuthCookie(userEmail, true);
+            return passwordsMatch;
         }
 
         public ChangePassswordMessage ChangePassword(string userEmail, string oldPassword, string newPassword, string confirmNewPassword)
