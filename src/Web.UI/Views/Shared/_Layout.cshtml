@@ -65,10 +65,7 @@
                         .Text("Home"))
                         .Add(new MainMenuItem()
                         .Action<HomeController>("About")
-                        .Text("About"))
-                        .Add(new MainMenuItem()
-                        .Action<HomeController>("Contact")
-                            .Text("Contact")))
+                        .Text("About")))
                     @if (!User.Identity.IsAuthenticated)
                     {
                         <ul class="nav navbar-nav navbar-right">

@@ -44,6 +44,8 @@ namespace Data.Mappings
                 .Length(10);
             Map(x => x.Toughness)
                 .Nullable();
+            Map(x => x.ConvertedManaCost)
+                .Nullable();
         }
     }
 }

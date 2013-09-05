@@ -1,5 +1,4 @@
-﻿using System;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Security;
 using Domain;
 using Domain.AbstractRepositories;
@@ -30,7 +29,6 @@ namespace Web.UI.Controllers
             if (_userRepository.AuthenticateUser(model.Email, model.Password))
             {
                 FormsAuthentication.SetAuthCookie(model.Email, model.RememberMe);
-                var v = User.Identity.IsAuthenticated;
                 if (Url.IsLocalUrl(returnUrl) && returnUrl != "/")
                 {
                     Redirect(returnUrl);
@@ -57,7 +55,8 @@ namespace Web.UI.Controllers
                 _userRepository.CreateNewUser(user, model.Password);
                 if (_userRepository.AuthenticateUser(model.Email, model.Password))
                 {
-                    var v = User.Identity.IsAuthenticated;
+                    FormsAuthentication.SetAuthCookie(model.Email, false);
+                    return RedirectToAction("Index", "CollectionManager");
                 }
                 return RedirectToAction("Index", "Home");
             }
