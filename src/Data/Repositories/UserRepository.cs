@@ -58,7 +58,7 @@ namespace Data.Repositories
             return _session.Query<User>().FirstOrDefault(u => u.Email.Equals(email)) != null;
         }
 
-        public bool AuthenticateUser(string userEmail, string password)
+        public AuthenticateMessages AuthenticateUser(string userEmail, string password)
         {
             const string query = "SELECT password FROM Users WHERE Email = :Email";
 
@@ -67,15 +67,13 @@ namespace Data.Repositories
                 .UniqueResult<dynamic>();
 
             if (result == null)
-                return false;
+                return AuthenticateMessages.UsernameDoesNotExist;
 
             var hashedPassword = result.ToString();
 
-            var  passwordsMatch = DoesPasswordMatch(password, hashedPassword);
-            if (passwordsMatch)
-                FormsAuthentication.Authenticate(userEmail, password);
-                FormsAuthentication.SetAuthCookie(userEmail, true);
-            return passwordsMatch;
+            return DoesPasswordMatch(password, hashedPassword)
+                ? AuthenticateMessages.AuthenticationSuccessfull
+                : AuthenticateMessages.WrongEmailOrPassword;
         }
 
         public ChangePassswordMessage ChangePassword(string userEmail, string oldPassword, string newPassword, string confirmNewPassword)

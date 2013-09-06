@@ -49,7 +49,7 @@ namespace Domain
             set { _manaCost = value ?? string.Empty; }
         }
 
-        public virtual string ConvertedManaCost { get; set; }
+        public virtual int ConvertedManaCost { get; set; }
 
         public virtual string CardType
         {

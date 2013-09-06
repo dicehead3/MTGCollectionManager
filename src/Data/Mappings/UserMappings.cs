@@ -9,10 +9,10 @@ namespace Data.Mappings
         {
             Table("Users");
             Id(x => x.Id);
-            HasMany(x => x.Cards)
+            HasManyToMany(x => x.Cards)
                 .AsBag().Cascade.AllDeleteOrphan()
                 .Access.CamelCaseField(Prefix.Underscore);
-            HasMany(x => x.Decks)
+            HasManyToMany(x => x.Decks)
                 .AsBag().Cascade.AllDeleteOrphan()
                 .Access.CamelCaseField(Prefix.Underscore);
             Map(x => x.DisplayName)

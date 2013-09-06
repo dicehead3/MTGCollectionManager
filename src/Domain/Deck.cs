@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Infrastructure.DomainBase;
 
 namespace Domain
@@ -28,6 +29,15 @@ namespace Domain
             protected set
             {
                 _name = value.Required("Deckname can't be empty");
+            }
+        }
+
+        public virtual Dictionary<int, int> ManaCurve {
+            get
+            {
+                return Cards.GroupBy(x => x.ConvertedManaCost)
+                            .OrderBy(x => x.Key)
+                            .ToDictionary(x => x.Key, x => x.Count());
             }
         }
     }

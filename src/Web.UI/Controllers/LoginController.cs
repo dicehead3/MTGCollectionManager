@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Collections.Generic;
+using System.Web.Mvc;
 using System.Web.Security;
 using Domain;
 using Domain.AbstractRepositories;
@@ -9,7 +10,7 @@ namespace Web.UI.Controllers
 {
     public class LoginController : Controller
     {
-        private IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
 
         public LoginController(IUserRepository userRepository)
         {
@@ -26,7 +27,8 @@ namespace Web.UI.Controllers
         [HttpPost]
         public ActionResult Index(LoginViewModel model, string returnUrl)
         {
-            if (_userRepository.AuthenticateUser(model.Email, model.Password))
+            var authenticationResult = _userRepository.AuthenticateUser(model.Email, model.Password);
+            if (authenticationResult == AuthenticateMessages.AuthenticationSuccessfull)
             {
                 FormsAuthentication.SetAuthCookie(model.Email, model.RememberMe);
                 if (Url.IsLocalUrl(returnUrl) && returnUrl != "/")
@@ -35,7 +37,14 @@ namespace Web.UI.Controllers
                 }
                 return RedirectToAction("Index", "CollectionManager");
             }
-            ModelState.AddModelError("", "Email or password is incorrect");
+            if (authenticationResult == AuthenticateMessages.UsernameDoesNotExist)
+            {
+                //Error message Unknown username
+            }
+            else
+            {
+                //Error message Email or password is incorrect
+            }
             return View();
         }
 
@@ -49,18 +58,17 @@ namespace Web.UI.Controllers
         [HttpPost]
         public ActionResult Register(RegisterViewModel model, string returnUrl)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) 
+                return View();
+            var user = new User(model.Email, model.DisplayName, _userRepository);
+            _userRepository.CreateNewUser(user, model.Password);
+            var authenticationResult = _userRepository.AuthenticateUser(model.Email, model.Password);
+            if (authenticationResult == AuthenticateMessages.AuthenticationSuccessfull)
             {
-                var user = new User(model.Email, model.DisplayName, _userRepository);
-                _userRepository.CreateNewUser(user, model.Password);
-                if (_userRepository.AuthenticateUser(model.Email, model.Password))
-                {
-                    FormsAuthentication.SetAuthCookie(model.Email, false);
-                    return RedirectToAction("Index", "CollectionManager");
-                }
-                return RedirectToAction("Index", "Home");
+                FormsAuthentication.SetAuthCookie(model.Email, false);
+                return RedirectToAction("Index", "CollectionManager");
             }
-            return View();
+                return RedirectToAction("Index", "Home");
         }
     }
 }

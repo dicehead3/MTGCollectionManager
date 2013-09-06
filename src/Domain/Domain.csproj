@@ -42,6 +42,7 @@
     <Compile Include="AbstractRepositories\ICardRepository.cs" />
     <Compile Include="AbstractRepositories\IDeckRepository.cs" />
     <Compile Include="AbstractRepositories\IUserRepository.cs" />
+    <Compile Include="AuthenticateMessages.cs" />
     <Compile Include="Card.cs" />
     <Compile Include="CardRarity.cs" />
     <Compile Include="ChangePassswordMessage.cs" />

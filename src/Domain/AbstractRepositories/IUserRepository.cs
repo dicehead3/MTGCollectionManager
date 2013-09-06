@@ -11,7 +11,7 @@ namespace Domain.AbstractRepositories
         void CreateNewUser(User user, string password);
         void Save(User user);
         bool EmailExists(string email);
-        bool AuthenticateUser(string userEmail, string password);
+        AuthenticateMessages AuthenticateUser(string userEmail, string password);
         ChangePassswordMessage ChangePassword(string userEmail, string oldPassword, string newPassword, string confirmNewPassword);
         void ResetPassword(string userEmail);
     }
