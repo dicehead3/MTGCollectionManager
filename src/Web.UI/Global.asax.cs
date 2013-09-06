@@ -1,6 +1,9 @@
-﻿using System.Web.Http;
+﻿using System.Linq;
+using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Domain.AbstractRepositories;
+using Ninject;
 using Web.UI.App_Start;
 
 namespace Web.UI
@@ -18,6 +21,12 @@ namespace Web.UI
             RouteConfig.RegisterRoutes(RouteTable.Routes);
 
             ControllerBuilder.Current.SetControllerFactory(new NinjectController());
+        }
+
+        protected void Application_AcquireRequestState()
+        {
+            if (User.Identity.IsAuthenticated)
+                Context.User = NinjectController.Kernel.Get<IUserRepository>().Get(x => x.Email == User.Identity.Name).First();
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Web.UI.Controllers
                 {
                     Redirect(returnUrl);
                 }
-                return RedirectToAction("Index", "CollectionManager");
+                return RedirectToAction("CollectionManager", "Collection");
             }
             if (authenticationResult == AuthenticateMessages.UsernameDoesNotExist)
             {
@@ -66,7 +66,7 @@ namespace Web.UI.Controllers
             if (authenticationResult == AuthenticateMessages.AuthenticationSuccessfull)
             {
                 FormsAuthentication.SetAuthCookie(model.Email, false);
-                return RedirectToAction("Index", "CollectionManager");
+                return RedirectToAction("CollectionManager", "Collection");
             }
                 return RedirectToAction("Index", "Home");
         }

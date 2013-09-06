@@ -11,28 +11,28 @@ namespace Web.UI.App_Start
 {
     public class NinjectController : DefaultControllerFactory
     {
-        private readonly IKernel _ninjectKernel;
-
         public NinjectController()
         {
-            _ninjectKernel = new StandardKernel();
+            Kernel = new StandardKernel();
             AddBindings();
         }
+
+        public static IKernel Kernel { get; private set; }
 
         protected override IController GetControllerInstance(System.Web.Routing.RequestContext requestContext, System.Type controllerType)
         {
             return controllerType == null
                 ? null
-                : (IController)_ninjectKernel.Get(controllerType);
+                : (IController)Kernel.Get(controllerType);
         }
 
         private void AddBindings()
         {
-            _ninjectKernel.Bind<IUserRepository>().To<UserRepository>();
-            _ninjectKernel.Bind<ICardRepository>().To<CardRepository>();
-            _ninjectKernel.Bind<IDeckRepository>().To<DeckRepository>();
-            _ninjectKernel.Bind<IEncryptor>().To<DefaultEncryptor>();
-            _ninjectKernel.Bind<ISession>().ToMethod(x => GetRequestSession()).InRequestScope();
+            Kernel.Bind<IUserRepository>().To<UserRepository>();
+            Kernel.Bind<ICardRepository>().To<CardRepository>();
+            Kernel.Bind<IDeckRepository>().To<DeckRepository>();
+            Kernel.Bind<IEncryptor>().To<DefaultEncryptor>();
+            Kernel.Bind<ISession>().ToMethod(x => GetRequestSession()).InRequestScope();
         }
 
         private static ISession GetRequestSession()
