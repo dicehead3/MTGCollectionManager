@@ -49,6 +49,7 @@
     <Compile Include="DomainBase\ValueObject.cs" />
     <Compile Include="Encryption\DefaultEncryptor.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
+    <Compile Include="HtmlHelpers\GathererGrab.cs" />
     <Compile Include="HtmlHelpers\MainMenu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

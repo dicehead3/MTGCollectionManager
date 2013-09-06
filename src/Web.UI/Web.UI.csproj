@@ -171,11 +171,11 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Login\Register.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Shared\_LayoutAuthenticated.cshtml" />
     <Content Include="Views\Collection\CollectionManager.cshtml" />
     <Content Include="Views\Collection\CollectionOverview.cshtml" />
     <Content Include="Views\Collection\DeckCreator.cshtml" />
     <Content Include="Views\Collection\DeckOverview.cshtml" />
+    <Content Include="Views\Collection\DatabaseBrowser.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

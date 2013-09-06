@@ -53,7 +53,6 @@
 
                          <ul class="nav navbar-nav navbar-right">
                              <li><a href="@Url.Action("Index", "Login")" >Log in</a></li>
-                             @*<li><a href="@Url.Action("Register", "Login")">Register</a></li>*@
                          </ul>
                      }
                      else
@@ -70,7 +69,10 @@
                                    .Text("Deck Overview"))
                                .Add(new MainMenuItem()
                                    .Action<CollectionController>("DeckCreator")
-                                   .Text("Create Deck")))
+                                   .Text("Create Deck"))
+                                   .Add(new MainMenuItem()
+                                   .Action<CollectionController>("DatabaseBrowser")
+                                   .Text("Browse MTG Database")))
                          <ul class="nav navbar-nav navbar-right">
                              @Html.ActionLink(((Domain.User) User).DisplayName, "CollectionManager", "Collection")
                              <span> | </span>
