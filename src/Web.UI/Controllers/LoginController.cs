@@ -20,7 +20,6 @@ namespace Web.UI.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            ViewBag.Title = "Login";
             return View();
         }
 
@@ -51,7 +50,6 @@ namespace Web.UI.Controllers
         [HttpGet]
         public ActionResult Register()
         {
-            ViewBag.Title = "Register";
             return View("Register");
         }
 

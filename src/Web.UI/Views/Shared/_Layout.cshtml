@@ -38,7 +38,14 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">MTG Collection Manager</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="navbar-brand" href="@Url.Action("CollectionManager", "Collection")">MTG Collection Manager</a>
+                    }
+                    else
+                    {
+                        <a class="navbar-brand" href="@Url.Action("Index", "Home")">MTG Collection Manager</a>
+                    }
                 </div>
                 <div class="navbar-collapse collapse">
                      @if (!User.Identity.IsAuthenticated)

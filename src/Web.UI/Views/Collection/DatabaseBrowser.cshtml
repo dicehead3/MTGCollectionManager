@@ -1,7 +1,7 @@
 ﻿@using System.Text.RegularExpressions
 @using Infrastructure.HtmlHelpers
 @{
-    ViewBag.Title = "DatabaseBrowser";
+    ViewBag.Title = "Browse Database";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -16,7 +16,7 @@
         {
             pageTitle = pageTitle.Remove(pageTitle.Length - 3);
             <tr>
-                <td>@pageTitle</td>
+                <td><a href="@String.Format("http://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid={0}", i)">@pageTitle</a></td>
             </tr>
         }
     }

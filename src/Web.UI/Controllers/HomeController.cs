@@ -11,7 +11,6 @@ namespace Web.UI.Controllers
 
         public ActionResult Index()
         {
-            ViewBag.Title = "Home";
             if(User.Identity.IsAuthenticated)
                 FormsAuthentication.SignOut();
             return View();
