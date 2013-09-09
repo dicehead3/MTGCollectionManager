@@ -16,7 +16,7 @@ namespace WindowsFormsApplication1
         private static List<CardData> cards = new List<CardData>();
         public static List<CardData> CreateCardList()
         {
-            int cardCount = 1636;
+            int cardCount = 1600;
             Task[] tasks = new Task[cardCount];
             int counter = 0;
             startTime = DateTime.Now;
