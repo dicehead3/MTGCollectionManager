@@ -3,13 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain.csproj", "{24D87D25-C50F-45F4-ADE9-BAD6F4BD2872}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Temorary Code Save", "Temorary Code Save", "{3C2409CD-214F-4133-9709-22254A8DB866}"
-	ProjectSection(SolutionItems) = preProject
-		NHibernate Connection String.txt = NHibernate Connection String.txt
-		WebPortal\App_Start\NinjectController.cs = WebPortal\App_Start\NinjectController.cs
-		UserLogin.txt = UserLogin.txt
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "src\Data\Data.csproj", "{50020F5D-E4B3-4982-9222-6B4BBC1A88B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{E3D406EC-A023-43D2-822E-904FC4DB0FFB}"

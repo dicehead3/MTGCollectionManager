@@ -3,7 +3,6 @@ using System.Web.Mvc;
 using System.Web.Security;
 using Domain;
 using Domain.AbstractRepositories;
-using Web.UI.Models;
 using Web.UI.ViewModels;
 
 namespace Web.UI.Controllers

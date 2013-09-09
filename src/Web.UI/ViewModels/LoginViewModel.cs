@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Web.UI.Models
+﻿namespace Web.UI.ViewModels
 {
     public class LoginViewModel
     {

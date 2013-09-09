@@ -24,8 +24,8 @@
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
-        <script src="../../assets/js/html5shiv.js"></script>
-        <script src="../../assets/js/respond.min.js"></script>
+        <script src="~/Scripts/html5shiv.js"></script>
+        <script src="~/Scripts/respond.min.js"></script>
         <![endif]-->
     </head>
 
@@ -40,11 +40,15 @@
                     </button>
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <a class="navbar-brand" href="@Url.Action("CollectionManager", "Collection")">MTG Collection Manager</a>
+                        <a class="navbar-brand" href="@Url.Action("CollectionManager", "Collection")">
+                            <img src="~/Content/Images/magic_logo.png" height="30"/>
+                        </a>
                     }
                     else
                     {
-                        <a class="navbar-brand" href="@Url.Action("Index", "Home")">MTG Collection Manager</a>
+                        <a class="navbar-brand" href="@Url.Action("Index", "Home")">
+                            <img src="~/Content/Images/magic_logo.png" height="30"/>
+                        </a>
                     }
                 </div>
                 <div class="navbar-collapse collapse">
@@ -81,7 +85,7 @@
                                    .Action<CollectionController>("DatabaseBrowser")
                                    .Text("Browse MTG Database")))
                          <ul class="nav navbar-nav navbar-right">
-                             @Html.ActionLink(((Domain.User) User).DisplayName, "CollectionManager", "Collection")
+                             @Html.ActionLink(((Domain.User) User).DisplayName, "ChangePassword", "User")
                              <span> | </span>
                              <a href="@Url.Action("Logout", "Home")" >Log out</a>
                          </ul>
