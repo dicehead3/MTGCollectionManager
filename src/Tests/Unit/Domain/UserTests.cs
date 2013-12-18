@@ -1,97 +1,224 @@
-﻿using Domain;
-using Domain.AbstractRepositories;
+﻿using System;
+using System.Globalization;
+using Domain.AbstractRepository;
+using Domain.Users;
 using Infrastructure.DomainBase;
 using Moq;
 using NUnit.Framework;
+using Tests.Utils.TestFixtures;
+using Tests.Utils.Various;
 
 namespace Tests.Unit.Domain
 {
-    [TestFixture]
-    class UserTests
+    class UserTests : BaseTestFixture
     {
-        private static IUserRepository CreateTestUserRepository(bool emailUnique)
-        {
-            var mock = new Mock<IUserRepository>();
-            mock.Setup(x => x.EmailExists("aap@noot.mies"))
-                .Returns(!emailUnique);
-
-            mock.Setup(x => x.EmailExists("noot@aap.mies"))
-                .Returns(!emailUnique);
-
-            return mock.Object;
-        }
-
         [Test]
         public void CanCreateUser()
         {
-            var userRepository = CreateTestUserRepository(true);
-            var user = new User("aap@noot.mies", "Jan", userRepository);
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique:true);
+            var culture = new CultureInfo("nl-NL");
 
-            Assert.AreEqual("aap@noot.mies", user.Email);
-            Assert.AreEqual("Jan", user.DisplayName);
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            Assert.AreEqual("robin@skaele.nl", user.Email);
+            Assert.AreEqual("Robin van der Knaap", user.DisplayName);
+            Assert.AreEqual(culture, user.Culture);
             Assert.AreEqual(0, user.Roles.Count);
-            Assert.AreEqual(0, user.Decks.Count);
-            Assert.AreEqual(0, user.Cards.Count);
         }
 
         [Test]
-        public void CannotCreateUserWithExistingEmail()
+        public void CannotCreateInvalidUser()
         {
-            var userRepository = CreateTestUserRepository(false);
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique:true);
+            var culture = new CultureInfo("nl-NL");
 
-            Assert.Throws<BusinessRuleViolationException>(
-                () =>
-                {
-                    var user = new User("aap@noot.mies", "Jan", userRepository);
-                });
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => new User(" ", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings), 
+                "Email address is required"
+            );
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => new User("robinskaelenl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings),
+                "'robinskaelenl' is not a valid email address"
+            );
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => new User("robin@skaele.nl", " ", culture, userRepository, DefaultTestApplicationSettings),
+                "Display name is required"
+            );
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => new User("robin@skaele.nl", "Robin van der Knaap", null, userRepository, DefaultTestApplicationSettings),
+                "Culture is required"
+            );
+
+            Assert.Throws<NullReferenceException>(
+                () => new User("robin@skaele.nl", "Robin van der Knaap", culture, null, DefaultTestApplicationSettings)
+            );
+
+            Assert.Throws<NullReferenceException>(
+                () => new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, null)
+            );
+        }
+
+        [Test]
+        public void CannotInvalidateUser()
+        {
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
+
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => user.SetEmail(" ", userRepository),
+                "Email address is required"
+            );
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => user.SetEmail("robinskaelenl", userRepository),
+                "'robinskaelenl' is not a valid email address"
+            );
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => user.SetCulture(null, DefaultTestApplicationSettings),
+                "Culture is required"
+            );
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => user.SetCulture(new CultureInfo("en-GB"), DefaultTestApplicationSettings),
+                "Culture is not accepted"
+            );
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => user.DisplayName = " ",
+                "Display name is required"
+            );
+        }
+
+        [Test]
+        public void CanChangeEmail()
+        {
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
+
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            user.SetEmail("daan@skaele.nl", userRepository);
+
+            Assert.AreEqual("daan@skaele.nl", user.Email);
+        }
+
+        [Test]
+        public void CannotCreateUserWithDuplicateEmail()
+        {
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: false);
+            var culture = new CultureInfo("nl-NL");
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings),
+                "Email must be unique"
+            );
+        }
+
+        [Test]
+        public void CannotChangeEmailToDuplicateEmail()
+        {
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
+
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            var userRepositoryEmailNotUnique = GetFakeRepositoryInstance(emailIsUnique: false);
+
+            CustomAssert.ThrowsWithExceptionMessage<BusinessRuleViolationException>(
+                () => user.SetEmail("daan@skaele.nl", userRepositoryEmailNotUnique),
+                "Email must be unique"
+            );
+        }
+
+        [Test]
+        public void CanChangeCulture()
+        {
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
+
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            user.SetCulture(new CultureInfo("en-US"), DefaultTestApplicationSettings);
+
+            Assert.AreEqual(new CultureInfo("en-US"), user.Culture);
         }
 
         [Test]
         public void CanAddRolesToUser()
         {
-            var userRepository = CreateTestUserRepository(true);
-            var user = new User("aap@noot.mies", "Jan", userRepository);
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
 
-            user.Roles.Add(Role.Admin);
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            user.Roles.Add(Role.Administrator);
             user.Roles.Add(Role.User);
 
             Assert.AreEqual(2, user.Roles.Count);
-            Assert.IsTrue(user.IsInRole(Role.Admin));
+            Assert.IsTrue(user.IsInRole(Role.Administrator));
             Assert.IsTrue(user.IsInRole("user"));
         }
 
         [Test]
-        public void CannotAddDuplicateRoles()
+        public void CannotAddDuplicateRolesToUser()
         {
-            var userRepository = CreateTestUserRepository(true);
-            var user = new User("aap@noot.mies", "Jan", userRepository);
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
 
-            user.Roles.Add(Role.Admin);
-            user.Roles.Add(Role.Admin);
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            user.Roles.Add(Role.Administrator);
+            user.Roles.Add(Role.Administrator);
 
             Assert.AreEqual(1, user.Roles.Count);
         }
 
         [Test]
-        public void CanDetermineUserRole()
+        public void CanDetermineIfUserIsInRole()
         {
-            var userRepository = CreateTestUserRepository(true);
-            var user = new User("aap@noot.mies", "Jan", userRepository);
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
 
-            user.Roles.Add(Role.User);
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
 
-            Assert.IsTrue(user.IsInRole(Role.User));
-            Assert.IsFalse(user.IsInRole(Role.Admin));
+            user.Roles.Add(Role.Administrator);
+
+            Assert.IsTrue(user.IsInRole(Role.Administrator));
+            Assert.IsFalse(user.IsInRole("user"));
         }
 
         [Test]
         public void CanGetIdentity()
         {
-            var userRepository = CreateTestUserRepository(true);
-            var user = new User("aap@noot.mies", "Jan", userRepository);
+            var userRepository = GetFakeRepositoryInstance(emailIsUnique: true);
+            var culture = new CultureInfo("nl-NL");
 
-            Assert.AreEqual("aap@noot.mies", user.Identity.Name);
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", culture, userRepository, DefaultTestApplicationSettings);
+
+            Assert.AreEqual("robin@skaele.nl", user.Identity.Name);
             Assert.IsTrue(user.Identity.IsAuthenticated);
+        }
+
+        private static IUserRepository GetFakeRepositoryInstance(bool emailIsUnique)
+        {
+            var userRepository = new Mock<IUserRepository>();
+
+            // Setup IsUserEmailUnique method, must return true or false as specified in parameter
+            userRepository
+                .Setup(x => x.IsUserEmailUnique("robin@skaele.nl"))
+                .Returns(emailIsUnique);
+
+            userRepository
+                .Setup(x => x.IsUserEmailUnique("daan@skaele.nl"))
+                .Returns(emailIsUnique);
+
+            return userRepository.Object;
         }
     }
 }

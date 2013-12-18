@@ -1,159 +1,388 @@
-﻿using System.Linq;
-using Data.Repositories;
-using Domain;
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Threading;
+using Data;
+using Domain.AbstractRepository;
+using Domain.Users;
+using Infrastructure.ApplicationSettings;
 using NUnit.Framework;
-using Tests.Utils;
+using Tests.Utils.ApplicationSettings;
+using Tests.Utils.TestFixtures;
+using Tests.Utils.Various;
 
 namespace Tests.Integration.Data
 {
-    public class UserRepositoryTests : DataTestFixture
+    [TestFixture]
+    class UserRepositoryTests : DataTestFixture
     {
         [Test]
-        public void CanRegisterUser()
+        public void CanCreateUser()
         {
-            var userRepository = new UserRepository(Session, Encryptor);
-            var cardRepository = new CardRepository(Session);
-            var deckRepository = new DeckRepository(Session);
+            var user = CreateUser();
+            
+            var userFromDb = GetUserRepository().GetOne(x => x.Email == "robin@skaele.nl");
 
-            var card = new Card("A", "B", "C", CardRarity.Special, "D", "E");
-            var deck = new Deck("F");
-            var user = new User("aap@noot.mies", "Appie", userRepository);
-            deck.Cards.Add(card);
-            deck.Cards.Add(card);
-            user.Decks.Add(deck);
-            user.Cards.Add(card);
-
-            Session.BeginTransaction();
-
-            userRepository.CreateNewUser(user, "test123");
-            cardRepository.Save(card);
-            deckRepository.Save(deck);
-
-            Session.Transaction.Commit();
-
-            Session.Evict(card);
-            Session.Evict(deck);
-            Session.Evict(user);
-            Session.Clear();
-
-            var userFromRepository = userRepository.Get(user.Id);
-
-            Assert.AreEqual(user.DisplayName, userFromRepository.DisplayName);
-            Assert.AreEqual(userFromRepository.Decks[0].Cards.Count, deck.Cards.Count);
-            Assert.AreEqual(userFromRepository.Cards.Count, 1);
-            Assert.AreEqual(userRepository.AuthenticateUser(userFromRepository.Email, "test123"), AuthenticateMessages.AuthenticationSuccessfull);
-            Assert.AreEqual(userRepository.AuthenticateUser("jan@post.nu", "blaat"), AuthenticateMessages.UsernameDoesNotExist);
-            Assert.AreEqual(userRepository.AuthenticateUser(userFromRepository.Email, "tester"), AuthenticateMessages.WrongEmailOrPassword);
+            Assert.AreEqual(user, userFromDb);
+            Assert.AreEqual(user.Email, userFromDb.Email);
+            Assert.AreEqual(user.DisplayName, userFromDb.DisplayName);
+            Assert.AreEqual(user.Culture, userFromDb.Culture);
+            Assert.AreEqual(0, userFromDb.Roles.Count);
         }
 
         [Test]
-
-        public void CanAddCardToMultipleUsers()
+        public void CanSaveUser()
         {
-            var userRepository = new UserRepository(Session, Encryptor);
-            var cardRepository = new CardRepository(Session);
+            var userRepository = GetUserRepository();
+            CreateUser();
 
-            var card = new Card("CardName", "CardType", "Expansion", CardRarity.Mythic, "Artist", "someUrl");
+            var userFromDbBeforeSave = userRepository.GetOne(x => x.Email == "robin@skaele.nl");
+            userFromDbBeforeSave.DisplayName = "Daan le Duc";
 
-            var user1 = new User("robin@skaele.nl", "Robin van der Knaap", userRepository);
-            user1.Cards.Add(card);
+            userRepository.Save(userFromDbBeforeSave);
 
-            var user2 = new User("erwinb@basecone.nl", "Erwin Bonnet", userRepository);
-            user2.Cards.Add(card);
+            Session.Flush();
+            Session.Evict(userFromDbBeforeSave);
 
-            Session.BeginTransaction();
+            var userFromDbAfterSave = userRepository.GetOne(x => x.Email == "robin@skaele.nl");
 
-            cardRepository.Save(card);
+            Assert.AreEqual("Daan le Duc", userFromDbAfterSave.DisplayName);
+        }
 
-            userRepository.CreateNewUser(user1, "test123");
-            userRepository.CreateNewUser(user2, "test123");
+        [Test]
+        public void CanAuthenticateUser()
+        {
+            var testApplicationSettings = new TestApplicationSettings
+            {
+                MaxLoginAttempts = 3
+            };
 
-            Session.Transaction.Commit();
+            var userRepository = GetUserRepository(testApplicationSettings);
 
-            Session.Evict(card);
+            CreateUser(testApplicationSettings);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+            Assert.IsFalse(userRepository.Authenticate("robin@skaele.n", "secret"));
+            Assert.IsFalse(userRepository.Authenticate("robin@skaele.nl", "secre"));
+        }
+
+        [Test]
+        public void UserCannotLoginAfterExceedingMaxLoginAttempts()
+        {
+            const int maxLoginAttempts = 3;
+
+            var testApplicationSettings = new TestApplicationSettings 
+            {
+                MaxLoginAttempts = maxLoginAttempts
+            };
+
+            var userRepository = GetUserRepository(testApplicationSettings);
+
+            CreateUser(testApplicationSettings);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            for (var ctr = 0; ctr < maxLoginAttempts; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsFalse(userRepository.Authenticate("robin@skaele.nl", "secret"));
+        }
+
+        [Test]
+        public void UserCanLoginWhenNotExceedingMaxLoginAttempts()
+        {
+            const int maxLoginAttempts = 5;
+
+            var testApplicationSettings = new TestApplicationSettings
+            {
+                MaxLoginAttempts = maxLoginAttempts
+            };
+
+            var userRepository = GetUserRepository(testApplicationSettings);
+
+            CreateUser(testApplicationSettings);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            for (var ctr = 0; ctr < maxLoginAttempts - 1; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+        }
+
+        [Test]
+        public void UserCanLoginAfterCoolOffPeriodExpires()
+        {
+            const int maxLoginAttempts = 3;
+            const int coolOffPeriod = 3; // seconds
+
+            var testApplicationSettings = new TestApplicationSettings
+            {
+                MaxLoginAttempts = maxLoginAttempts,
+                CoolOffPeriod = coolOffPeriod
+            };
+
+            var userRepository = GetUserRepository(testApplicationSettings);
+
+            CreateUser(testApplicationSettings);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            for (var ctr = 0; ctr < maxLoginAttempts; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsFalse(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            // Cool off
+            Thread.Sleep(coolOffPeriod * 1000);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+        }
+
+        [Test]
+        public void UserLoginAttemptsAreResetAfterCoolOffPeriodExpires()
+        {
+            const int maxLoginAttempts = 5;
+            const int coolOffPeriod = 2; // seconds
+
+            var testApplicationSettings = new TestApplicationSettings
+            {
+                MaxLoginAttempts = maxLoginAttempts,
+                CoolOffPeriod = coolOffPeriod
+            };
+
+            var userRepository = GetUserRepository(testApplicationSettings);
+
+            CreateUser(testApplicationSettings);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            for (var ctr = 0; ctr < maxLoginAttempts; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsFalse(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            // Cool off
+            Thread.Sleep(coolOffPeriod * 1000);
+
+            for (var ctr = 0; ctr < maxLoginAttempts - 1; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+        }
+
+        [Test]
+        public void UserLoginAttemptsAreResetAfterSuccessfullLogin()
+        {
+            const int maxLoginAttempts = 5;
+
+            var testApplicationSettings = new TestApplicationSettings
+            {
+                MaxLoginAttempts = maxLoginAttempts
+            };
+
+            var userRepository = GetUserRepository(testApplicationSettings);
+
+            CreateUser(testApplicationSettings);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            for (var ctr = 0; ctr < maxLoginAttempts -1; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            for (var ctr = 0; ctr < maxLoginAttempts - 1; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+        }
+
+        [Test]
+        public void CannotCreateUserWithInvalidPassword()
+        {
+            var userRepository = GetUserRepository();
+
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", new CultureInfo("nl-NL"), userRepository, DefaultTestApplicationSettings);
+
+            CustomAssert.ThrowsWithExceptionMessage<ArgumentException>(
+                () => userRepository.Create(user, "1234"),
+                "Password does not comply to password policy"
+            );
+        }
+
+        [Test]
+        public void CannotCreateUserWhichIsAlreadyCreated()
+        {
+            var userRepository = GetUserRepository();
+
+            var user = CreateUser();
+
+            CustomAssert.ThrowsWithExceptionMessage<InvalidOperationException>(
+                () => userRepository.Create(user, "secret"),
+                "Can't create an existing user"
+            );
+        }
+
+        [Test]
+        public void CannotSaveUserWhichIsNotCreatedYet()
+        {
+            var userRepository = GetUserRepository();
+
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", new CultureInfo("nl-NL"), userRepository, DefaultTestApplicationSettings);
+
+            CustomAssert.ThrowsWithExceptionMessage<InvalidOperationException>(
+                () => userRepository.Save(user),
+                "Cannot save user if not created first."
+            );
+        }
+
+        [Test]
+        public void CanChangePassword()
+        {
+            var userRepository = GetUserRepository();
+
+            var user = CreateUser();
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            userRepository.ChangePassword(user, "newPassword");
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "newPassword"));
+        }
+
+        [Test]
+        public void CannotChangePasswordForUserThatHasNotBeenCreatedYet()
+        {
+            var userRepository = GetUserRepository();
+
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", new CultureInfo("nl-NL"), userRepository, DefaultTestApplicationSettings);
+
+            CustomAssert.ThrowsWithExceptionMessage<InvalidOperationException>(
+                () => userRepository.ChangePassword(user, "newPassword"),
+                "Cannot change password for user who is not yet been persisted"
+            );
+        }
+
+        [Test]
+        public void CannotChangePasswordWhenPasswordIsNotValid()
+        {
+            var userRepository = GetUserRepository();
+
+            var user = CreateUser();
+
+            CustomAssert.ThrowsWithExceptionMessage<ArgumentException>(
+                () => userRepository.ChangePassword(user, "1234"),
+                "Password does not comply to password policy"
+            );
+        }
+
+        [Test]
+        public void CanChangePasswordWhenMaxAttemptsIsExceeded()
+        {
+            const int maxLoginAttempts = 3;
+
+            var testApplicationSettings = new TestApplicationSettings
+            {
+                MaxLoginAttempts = maxLoginAttempts,
+                CoolOffPeriod = 1000
+            };
+
+            var userRepository = GetUserRepository(testApplicationSettings);
+
+            var user = CreateUser(testApplicationSettings);
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            for (var ctr = 0; ctr < maxLoginAttempts; ctr++)
+            {
+                userRepository.Authenticate("robin@skaele.nl", "wrongPassword");
+            }
+
+            Assert.IsFalse(userRepository.Authenticate("robin@skaele.nl", "secret"));
+
+            userRepository.ChangePassword(user, "newPassword");
+
+            Assert.IsTrue(userRepository.Authenticate("robin@skaele.nl", "newPassword"));
+        }
+
+        [Test]
+        public void CanGetHashForNewPassword()
+        {
+            var userRepository = GetUserRepository();
+            var user = CreateUser();
+
+            var hash = userRepository.GetHashForNewPasswordRequest(user);
+
+            Assert.IsTrue(userRepository.IsHashForNewPasswordRequestValid(user, hash));
+        }
+
+        [Test]
+        public void CanUseBaseRepositoryQueryMethodsOnUserEntity()
+        {
+            var userRepository = GetUserRepository();
+
+            var user1 = new User("robin@skaele.nl", "Robin van der Knaap", new CultureInfo("nl-NL"), userRepository, DefaultTestApplicationSettings);
+            var user2 = new User("daan@skaele.nl", "Daan le Duc", new CultureInfo("nl-NL"), userRepository, DefaultTestApplicationSettings);
+            var user3 = new User("eric@skaele.nl", "Eric Smalley", new CultureInfo("nl-NL"), userRepository, DefaultTestApplicationSettings);
+
+            userRepository.Create(user1, "secret");
+            userRepository.Create(user2, "secret");
+            userRepository.Create(user3, "secret");
+
+            Session.Flush();
             Session.Evict(user1);
             Session.Evict(user2);
-            Session.Clear();
+            Session.Evict(user3);
 
-            var userFromDatabase1 = userRepository.Get(user1.Id);
-            var userFromDatabase2 = userRepository.Get(user2.Id);
-
-            Assert.AreEqual(1, userFromDatabase1.Cards.Count);
-            Assert.AreEqual(1, userFromDatabase2.Cards.Count);
-            Assert.AreEqual(card, userFromDatabase1.Cards.First());
-            Assert.AreEqual(card, userFromDatabase2.Cards.First());
+            Assert.AreEqual(user1, userRepository.Get(user1.Id));
+            Assert.AreEqual(user2, userRepository.GetOne(x => x.Email == "daan@skaele.nl"));
+            Assert.AreEqual(3, userRepository.GetAll().Count());
+            Assert.AreEqual(2, userRepository.GetAll(x => x.DisplayName.Contains("c")).Count());
         }
 
-        [Test]
-        public void UserCanChangePassword()
+        private IUserRepository GetUserRepository()
         {
-            var userRepository = new UserRepository(Session, Encryptor);
-            var cardRepository = new CardRepository(Session);
-            var deckRepository = new DeckRepository(Session);
+            return GetUserRepository(new TestApplicationSettings());
+        }
 
-            var card = new Card("A", "B", "C", CardRarity.Special, "D", "E");
-            var deck = new Deck("F");
-            var user = new User("aap@noot.mies", "Appie", userRepository);
-            deck.Cards.Add(card);
-            deck.Cards.Add(card);
-            user.Decks.Add(deck);
-            user.Cards.Add(card);
+        private IUserRepository GetUserRepository(IApplicationSettings applicationSettings)
+        {
+            return new UserRepository(Session, PasswordPolicy, applicationSettings, Encryptor);
+        }
 
-            Session.BeginTransaction();
+        private User CreateUser()
+        {
+            return CreateUser(new TestApplicationSettings());
+        }
 
-            userRepository.CreateNewUser(user, "test123");
-            cardRepository.Save(card);
-            deckRepository.Save(deck);
+        private User CreateUser(IApplicationSettings applicationSettings)
+        {
+            var userRepository = GetUserRepository(applicationSettings);
 
-            Session.Transaction.Commit();
+            var user = new User("robin@skaele.nl", "Robin van der Knaap", new CultureInfo("nl-NL"), userRepository, DefaultTestApplicationSettings);
 
-            Session.Evict(card);
-            Session.Evict(deck);
+            userRepository.Create(user, "secret");
+
+            // Make sure user is evicted from session so it won't be cached
+            Session.Flush();
             Session.Evict(user);
-            Session.Clear();
 
-            var userFromRepository = userRepository.Get(user.Id);
-
-            var message = userRepository.ChangePassword(userFromRepository.Email, "test123", "etende", "etende");
-
-            Assert.AreEqual(message, ChangePassswordMessage.PasswordChanged);
-        }
-
-        [Test]
-        public void CanAddDeckToMultipleUsers()
-        {
-            var userRepository = new UserRepository(Session, Encryptor);
-            var deckRepository = new DeckRepository(Session);
-
-            var deck = new Deck("DeckName");
-
-            var user1 = new User("robin@skaele.nl", "Robin van der Knaap", userRepository);
-            user1.Decks.Add(deck);
-
-            var user2 = new User("erwinb@basecone.nl", "Erwin Bonnet", userRepository);
-            user2.Decks.Add(deck);
-
-            Session.BeginTransaction();
-
-            deckRepository.Save(deck);
-
-            userRepository.CreateNewUser(user1, "test123");
-            userRepository.CreateNewUser(user2, "test123");
-
-            Session.Transaction.Commit();
-
-            Session.Evict(deck);
-            Session.Evict(user1);
-            Session.Evict(user2);
-            Session.Clear();
-
-            var userFromDatabase1 = userRepository.Get(user1.Id);
-            var userFromDatabase2 = userRepository.Get(user2.Id);
-
-            Assert.AreEqual(1, userFromDatabase1.Decks.Count);
-            Assert.AreEqual(1, userFromDatabase2.Decks.Count);
-            Assert.AreEqual(deck, userFromDatabase1.Decks.First());
-            Assert.AreEqual(deck, userFromDatabase2.Decks.First());
+            return user;
         }
     }
 }

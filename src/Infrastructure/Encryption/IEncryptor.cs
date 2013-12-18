@@ -2,6 +2,7 @@
 {
     public interface IEncryptor
     {
-        string MakeSha512Hash(string phrase);
+        string Md5Encrypt(string phrase);
+        string Sha512Encrypt(string phrase);
     }
 }
