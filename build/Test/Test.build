@@ -1,0 +1,24 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+
+  <Target Name="CopyConfig">
+    <Copy
+      SourceFiles="Configs/Environment.Test.config"
+      DestinationFiles="../../LocalConfig/Environment.config"
+      />
+    <Copy
+        SourceFiles="Configs/NLog.Test.config"
+        DestinationFiles="../../LocalConfig/NLog.config"
+        />
+  </Target>
+
+  <Target Name="Clean">
+      <MSBuild Targets="Clean" Projects="../../SkaeleSolutionTemplate.sln" />
+  </Target>
+
+  <Target Name="Rebuild">
+      <MSBuild Targets="Rebuild" Projects="../../SkaeleSolutionTemplate.sln" />
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="CopyConfig;Clean;Rebuild" />
+</Project>

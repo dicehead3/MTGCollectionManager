@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@RenderSection("Title", required: true) - Skaele Architecture</title>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <link rel="shortcut icon" media="all" type="image/x-icon" href="/Themes/Default/Images/favicon.png" />
+
+    @Styles.Render("~/Bundle/Themes/Default/Css")
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    
+    @Scripts.Render("~/Bundle/Themes/Default/Js")
+
+    <!-- Load localisation script for jqgrid based on current culture -->
+    @*@Scripts.Render("~/Themes/Default/Js/Libraries/JqGrid/i18n/grid.locale-" + CultureInfo.CurrentCulture.TwoLetterISOLanguageName + ".js")*@
+
+</head>
+
+    <body>
+        @Html.FlashMessage("flashMessages")
+        <div class="container">
+            
+            @if (IsSectionDefined("MainMenu"))
+            {
+                @RenderSection("MainMenu", required:false);
+            }
+            else
+            {
+                <div class="row">
+                    <div class="navbar-fixed-top navbar-inverse">
+                        <div class="navbar-inner">
+                            <div class="container">
+                    
+                                @(Html.MainMenu()
+                                      .Add(new MainMenuItem()
+                                               .Action<HomeController>("Index")
+                                               .Text(T.Dashboard))
+                                      .Add(new MainMenuItem()
+                                               .Action<UserController>("Index")
+                                               .Text(T.Users))
+                                      .Add(new MainMenuItem()
+                                               .Text("More Pages")
+                                               .Add(new SubMenuItem()
+                                                        .Url("http://www.skaele.nl")
+                                                        .Text("Skaele"))
+                                               .Add(new SubMenuItem()
+                                                        .Url("https://skaele.atlassian.net/wiki/display/SK/Skaele+.NET+solution+template")
+                                                        .Text("Wiki"))
+                                               .Add(new Divider())
+                                               .Add(new SubMenuItem()
+                                                        .Action<HomeController>("Email")
+                                                        .Text(T.SendEmail))
+                                               .Add(new SubMenuItem()
+                                                        .Action<HomeController>("FlashMessages")
+                                                        .Text(T.FlashMessages))
+                                               .Add(new Divider())
+                                               .Add(new SubMenuItem()
+                                                        .Action<LogController>("Index")
+                                                        .Text("Log"))
+                                               .Add(new Divider())
+                                               .Add(new SubMenuItem()
+                                                        .Action<HomeController>("Unauthorized")
+                                                        .Text("401 - " + T.Unauthorized))
+                                               .Add(new SubMenuItem()
+                                                        .Action<HomeController>("Forbidden")
+                                                        .Text("403 - " + T.Forbidden))
+                                               .Add(new SubMenuItem()
+                                                        .Url("BogusUrl")
+                                                        .Text("404 - " + T.PageNotFound))
+                                               .Add(new SubMenuItem()
+                                                        .Action<HomeController>("Error")
+                                                        .Text("500 - " + T.InternalServerError))
+                                      )
+                                )
+                                
+                                <div class="loggedInUser">
+                                    @Html.ActionLink(((Domain.Users.User) User).DisplayName, "Index", "User")
+                                    <span> | </span>
+                                    @Html.ActionLink("Logout", "Logout", "Login")
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            @RenderBody()
+            
+            @if (IsSectionDefined("Footer"))
+            {
+                @RenderSection("Footer", required: false);
+            }
+            else
+            {
+                <div class="row">
+                    <div class="span12">
+                        <img src="~/Themes/Default/Images/blocks.png" alt=""/>
+                        <span class="pull-right">v@(Settings.ApplicationVersion) </span>
+                    </div>
+                </div>
+            }
+        </div>
+    </body>
+</html>
